@@ -1,0 +1,117 @@
+# A multi-account .muttrc for use with Gmail
+
+#---------------#
+# Account Hooks #
+#---------------#
+account-hook . "unset imap_user; unset imap_pass; unset tunnel" # unset first!
+account-hook        "imaps://%GMAIL1_LOGIN%@imap.gmail.com/" "\
+    set imap_user   = %GMAIL1_LOGIN% \
+        imap_pass   = %GMAIL1_PASS%"
+account-hook        "imaps://%GMAIL2_LOGIN%@imap.gmail.com/" "\
+    set imap_user   = %GMAIL2_LOGIN% \
+        imap_pass   = %GMAIL2_PASS%"
+
+#-------------------------------------#
+# Folders, mailboxes and folder hooks #
+#-------------------------------------#
+# Setup for user1:
+set folder          = imaps://%GMAIL1_LOGIN%@imap.gmail.com/
+mailboxes           = +INBOX =[Gmail]/'All Mail' =[Gmail]/Starred =[Gmail]/Important =[Gmail]/Drafts =[Gmail]/'Sent Mail' =[Gmail]/Spam =[Gmail]/Trash
+set spoolfile       = +INBOX
+set signature       = "~/.mutt/signature"
+folder-hook         imaps://%GMAIL1_LOGIN%@imap.gmail.com/ "\
+    set folder      = imaps://%GMAIL1_LOGIN%@imap.gmail.com/ \
+        spoolfile   = +INBOX \
+        postponed   = +[Gmail]/Drafts \
+        record      =  \
+        from        = '%GMAIL1_NAME% <%GMAIL1_LOGIN%> ' \
+        realname    = '%GMAIL1_NAME%' \
+        smtp_url    = smtps://%GMAIL1_LOGIN%@smtp.gmail.com:465/ \
+        smtp_pass   = %GMAIL1_PASS%"
+ 
+# Setup for user2:
+set folder          = imaps://%GMAIL2_LOGIN%@imap.gmail.com/
+mailboxes           = +INBOX =[Gmail]/'All Mail' =[Gmail]/Starred =[Gmail]/Important =[Gmail]/Drafts =[Gmail]/'Sent Mail' =[Gmail]/Spam =[Gmail]/Trash
+set spoolfile       = +INBOX
+folder-hook         imaps://@%GMAIL2_LOGIN%@imap.gmail.com/ "\
+    set folder      = imaps://%GMAIL2_LOGIN%@imap.gmail.com/ \
+        spoolfile   = +INBOX \
+        postponed   = +[Gmail]/Drafts \
+        record      =  \
+        from        = '%GMAIL2_NAME% <%GMAIL2_LOGIN%> ' \
+        realname    = '%GMAIL2_NAME%' \
+        smtp_url    = smtps://%GMAIL2_LOGIN%@smtp.gmail.com:465/ \
+        smtp_pass   = %GMAIL2_PASS%"
+
+
+#--------#
+# Macros #
+#--------#
+macro index P "y12<return><return>" # jump to mailbox number 16 (user1 inbox)
+macro index D "y6<return><return>"  # jump to mailbox number 8 (user2 inbox)
+
+
+# Change the following line to a different editor you prefer (and update the Dockerfile accordingly, of course).
+set editor = "vim"
+
+# I like seeing some headers. :)
+ignore *
+unignore date subject x- user-agent posted-to content-type
+unignore to cc bcc reply-to from
+set edit_headers = yes
+my_hdr X-Docker-Image: jess/mutt
+
+# TODO figure out how to use the sidebar more effectively :)
+set sidebar_visible = no
+
+# Tianon keybindings and settings, because he's special.
+bind pager <up> previous-line
+bind pager <down> next-line
+set resolve = no # uh, don't randomly take me to other messages when I do things
+
+# Basic config, you can leave this as is
+set imap_check_subscribed
+set hostname = gmail.com
+set mail_check = 60
+set timeout = 300
+set imap_keepalive = 300
+
+set header_cache=~/.mutt/cache/headers
+set message_cachedir=~/.mutt/cache/bodies
+set certificate_file=~/.mutt/certificates
+
+set move = no
+set include
+set sort = 'reverse-threads'
+set sort_aux = 'last-date-received'
+set auto_tag = yes
+
+ignore "Authentication-Results:"
+ignore "DomainKey-Signature:"
+ignore "DKIM-Signature:"
+hdr_order Date From To Cc
+alternative_order text/plain text/html *
+auto_view text/html
+
+bind editor <Tab> complete-query
+bind editor ^T complete
+bind editor <space> noop
+
+set mailcap_path = ~/.mutt/mailcap
+
+# Gmail-style keyboard shortcuts
+macro index,pager gi "<change-folder>=INBOX<enter>" "Go to Inbox"
+macro index,pager ga "<change-folder>=[Gmail]/All Mail<enter>" "Go to All Mail"
+macro index,pager gd "<change-folder>=[Gmail]/Drafts<enter>" "Go to Drafts"
+macro index,pager gs "<change-folder>=[Gmail]/Sent Mail<enter>" "Go to Sent Mail"
+
+macro index,pager a "<enter-command>unset resolve<enter><enter-command>unset trash<enter><clear-flag>N<enter-command>set resolve<enter><delete-message><enter>"
+macro index,pager d ";s+[Gmail]/Trash<enter><enter>" "Trash"
+macro index,pager u ";s+INBOX<enter><enter>" "Move to Inbox"
+macro index,pager !  <save-message>=[Gmail]/Spam<enter><enter> "Report spam"
+macro index,pager +  <save-message>=[Gmail]/Important<enter><enter> "Mark as Important"
+macro index,pager *  <save-message>=[Gmail]/Starred<enter><enter> "Star Message"
+
+# colors
+source ~/.mutt/mutt-colors-solarized-dark-16.muttrc
+source ~/.mutt/mutt-patch-highlighting.muttrc

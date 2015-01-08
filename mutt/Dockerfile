@@ -3,7 +3,10 @@ FROM debian:stable
 RUN groupadd -g 1000 user \
 	&& useradd --create-home -d /home/user -g user -u 1000 user
 
-RUN apt-get update && apt-get install -y ca-certificates git mutt-patched
+RUN apt-get update && apt-get install -y \
+    ca-certificates \
+    git \
+    mutt-patched 
 
 # a browser is necessary!
 RUN apt-get update && apt-get install -y lynx
@@ -21,16 +24,14 @@ RUN mkdir -p $HOME/.mutt/cache/headers $HOME/.mutt/cache/bodies \
 # vim settings
 RUN git clone https://github.com/jfrazelle/.vim.git $HOME/.vim \
     && git clone https://github.com/altercation/vim-colors-solarized $HOME/.vim/bundle/vim-colors-solarized \
-    && cp $HOME/.vim/vimrc.txt $HOME/.vimrc
+    && cp $HOME/.vim/vimrc.txt $HOME/.vimrc \
+    && mkdir -p $HOME/Mail
 
 ENV LANG C.UTF-8
 
 COPY    entrypoint.sh   /entrypoint.sh
-COPY    .muttrc  $HOME/.muttrc
-COPY    .mailcap    $HOME/.mailcap
-COPY    mutt-colors-solarized-dark-16.muttrc $HOME/mutt-colors-solarized-dark-16.muttrc
-COPY    mutt-patch-highlighting.muttrc $HOME/mutt-patch-highlighting.muttrc
+COPY    .mutt  $HOME/.mutt
 
 ENTRYPOINT ["/entrypoint.sh"]
 
-CMD ["mutt-patched"]
+CMD ["mutt-patched", "-F", "~/.mutt/muttrc"]
