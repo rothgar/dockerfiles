@@ -29,5 +29,8 @@ znc/conf/
 *.swo
 
 itunes/iTunesSetup.exe
+<<<<<<< 4edfd82ae145246eb19c296d149a121852cfb6e9
 yubikey/
 kiwi-builder/artifacts
+=======
+>>>>>>> add gcalcli, itunes, update spotify-wine
